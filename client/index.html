@@ -1,63 +1,164 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SE 3316 - Lab 3</title>
-    
-    <!-- Link to CSS for styling -->
-    <link rel="stylesheet" href="Styles.CSS">
-    
-    <!-- Link JavaScript files for each class -->
-    <script defer src="InputValidator.js"></script>
-    <script defer src="MapManager.js"></script>
-    <script defer src="SearchManager.js"></script>
-    <script defer src="ListManager.js"></script>
-    <script defer src="PaginationManager.js"></script>
-    <script defer src="UIRenderer.js"></script>
-    <script defer src="lab3.js"></script> <!-- Main script to initialize classes -->
+      <meta charset="UTF-8">
+      <title>Europe Travel Explorer</title>
+      
+      <!-- Include Leaflet CSS for the map -->
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+      <link rel="stylesheet" href="styles.css">
   </head>
+
   <body>
-    <!-- Header -->
-    <header>
-      <h1>Explore Europe Destinations</h1>
-    </header>
+        <header>
+            <h1>Europe Travel Explorer</h1>
+        </header>
 
-    <!-- Search Section -->
-    <section id="search-section">
-      <input type="text" id="search-input" placeholder="Search by name, region, or country...">
-      <button id="search-btn">Search</button>
-    </section>
+        <article>
+            <h2>Search Destinations</h2>    
+        </article>
 
-    <!-- Pagination Controls -->
-    <section id="pagination-section">
-      <label for="results-count">Results per page:</label>
-      <select id="results-count">
-        <option value="5">5</option>
-        <option value="10">10</option>
-        <option value="20">20</option>
-      </select>
-      <button id="prev-page">Previous</button>
-      <button id="next-page">Next</button>
-    </section>
+        <div id="search-results" class="search-results">
+            <!-- Search Section -->
+            <section class="search">
+                <!-- <h2>Search Destinations</h2> -->
 
-    <!-- Results Display -->
-    <section id="results-section">
-      <div id="results-list"></div>
-    </section>
+                <!-- Dropdown search field -->
+                <label for="search-field"> </label>
+                <select id="search-field">
+                    <option value="None">Select Field</option>
+                    <option value="Destination">Destination</option>
+                    <option value="Region">Region</option>
+                    <option value="Country">Country</option>
+                    <option value="Category">Category</option>
+                    <option value="Latitude">Latitude</option>
+                    <option value="Longitude">Longitude</option>
+                    <option value="Approximate_Annual_Tourists">Approximate Annual Tourists</option>
+                    <option value="Currency">Currency</option>
+                    <option value="Majority_Religion">Majority Religion</option>
+                    <option value="Famous_Foods">Famous Foods</option>
+                    <option value="Language">Language</option>
+                    <option value="Best_Time_to_Visit">Best Time to Visit</option>
+                    <option value="Cost_of_Living">Cost of Living</option>
+                    <option value="Safety">Safety</option>
+                    <option value="Cultural_Significance">Cultural Significance</option>
+                    <option value="Description">Description</option>
+                </select>
 
-    <!-- Favorite Lists Section -->
-    <section id="favorites-section">
-      <h2>Favorite Lists</h2>
-      <input type="text" id="list-name" placeholder="Enter list name">
-      <button id="create-list-btn">Create List</button>
-      <div id="favorites-list"></div>
-    </section>
+                <!-- Search bar and button -->
+                <label for="search-bar"> </label>
+                <input type="text" id="search-bar" maxlength="20" placeholder="Enter search term">
+                <button id="search-btn">Search</button>
+                
+                <div id="page-info" class="page-info">Search Results:
+                    <input type="number" id="search-limit" value="10" min="1">
+                </div>
 
-    <!-- Map Display -->
-    <section id="map-section">
-      <h2>Map</h2>
-      <div id="map"></div>
-    </section>
+            </section>
+        </div>
+
+      
+
+        <!-- Search Results -->
+        <article>
+            <h2>Map View</h2>
+        </article>
+
+        <div id="search-results" class="search-results">
+            
+            <!-- Map Section -->
+            <section id="map-section" class="map-section">
+                <!-- <h1>Map View</h1> -->
+                <div id="map"></div>
+            </section>
+
+                <!-- Include Leaflet JS -->
+            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+        </div>
+
+        <article>
+            <h2>FAVORITE LISTS</h2>
+        </article>
+        <div id="search-results" class="search-results">
+            
+            <!-- Favorites Section -->
+            <section class="favorites-section">
+                <!-- <h2>FAVORITE LISTS</h2> -->
+
+                <!-- Horizontal alignment for List Name and Sort Favorites By fields -->
+                <div class="favorites-fields">
+                    
+
+                    <div class="favorites-sort-controls">
+                        <label for="favorites-sort-field"> </label>
+                        <select id="favorites-sort-field">
+                            <option value="None"> Sort Favorites By:</option>
+                            <option value="Destination">Destination</option>
+                            <option value="Region">Region</option>
+                            <option value="Country">Country</option>
+                            <option value="Category">Category</option>
+                            <option value="Latitude">Latitude</option>
+                            <option value="Longitude">Longitude</option>
+                            <option value="Tourists">Approximate Annual Tourists</option>
+                            <option value="Currency">Currency</option>
+                            <option value="Religion">Majority Religion</option>
+                            <option value="Foods">Famous Foods</option>
+                            <option value="Language">Language</option>
+                            <option value="Visit_Time">Best Time to Visit</option>
+                            <option value="Living_Cost">Cost of Living</option>
+                            <option value="Safety">Safety</option>
+                            <option value="Culture">Cultural Significance</option>
+                            <option value="Description">Description</option>
+                        </select>
+                    </div>
+
+                    <div class="favorites-controls">
+                    <label for="list-name"> </label>
+                    <input type="text" id="list-name" placeholder="Enter list name">
+                </div>
+
+                </div>
+
+                <!-- Horizontal alignment for buttons -->
+                <div class="favorites-buttons">
+                    <button id="create-list-btn">Create List</button>
+                    <button id="save-list-btn">Save to List</button>
+                    <button id="view-list-btn">View List</button>
+                    <button id="delete-list-btn">Delete List</button>
+                </div>
+
+                <div id="favorites-results" class="favorites-results"></div>
+            </section>  
+        </div>
+
+        <!--
+            ( Map Section )
+            <section id="map-section" class="map-section">
+            <h1>Map View</h1>
+            <div id="map"></div>
+            </section>
+
+            ( Include Leaflet JS )
+            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+            -->
+
+        <footer>
+            <section class="pagination">
+                <button id="prev-page-btn" class="prev-page">Back</button>
+
+                <button id="next-page-btn" class="next-page">Next</button>
+            </section>
+            <p class="data-info">
+                <h3> Data provided by europe-destinations.csv </h3> 
+            </p>
+        </footer>    
+
+
+        <!-- Include the lab3.js file -->
+        <script src="lab3.js"></script>
+
   </body>
 </html>
+
