@@ -90,6 +90,54 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+        // Function to search within a favorites list
+    const searchFavoritesButton = document.getElementById('search-favorites-btn');
+    const favoritesSearchInput = document.getElementById('favorites-search-term');
+
+    searchFavoritesButton.addEventListener('click', async () => {
+        const listName = listNameInput.value.trim();
+        const searchTerm = favoritesSearchInput.value.trim().toLowerCase();
+
+        if (!listName) {
+            alert('Please enter a list name.');
+            return;
+        }
+
+        if (!searchTerm) {
+            alert('Please enter a search term.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/lists/${encodeURIComponent(listName)}/details`);
+            if (response.ok) {
+                const destinations = await response.json();
+                favoritesContainer.innerHTML = '';
+
+                const filteredDestinations = destinations.filter(dest => {
+                    return dest && dest._Destination && dest._Destination.toLowerCase().includes(searchTerm);
+                });
+
+                if (filteredDestinations.length > 0) {
+                    filteredDestinations.forEach(dest => {
+                        const destDiv = document.createElement('div');
+                        destDiv.textContent = `${dest._Destination} - ${dest.Country}`;
+                        favoritesContainer.appendChild(destDiv);
+                    });
+                } else {
+                    favoritesContainer.textContent = 'No matching destinations found in this list.';
+                }
+            } else {
+                const error = await response.json();
+                alert(`Error: ${error.error}`);
+            }
+        } catch (error) {
+            console.error('Error searching within the list:', error);
+            alert('An error occurred while searching the list.');
+        }
+    });
+
+
     // Function to save destinations to a list
     saveListButton.addEventListener('click', async () => {
         const listName = listNameInput.value.trim();
