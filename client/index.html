@@ -37,6 +37,44 @@
         <div id="map"></div>
     </div>
 
+    <div class="favorites-section">
+        <h2>Favorites Management</h2>
+        <input type="text" id="list-name" placeholder="Enter list name">
+        <div class="favorites-buttons">
+            <button id="create-list-btn">Create List</button>
+            <button id="save-list-btn">Save to List</button>
+            <button id="view-list-btn">View List</button>
+            <button id="delete-list-btn">Delete List</button>
+        </div>
+
+        <div class="favorites-sort-controls">
+            <label for="favorites-sort-field">Sort Favorites By:</label>
+            <select id="favorites-sort-field">
+                <option value="None">Select Field</option>
+                <option value="Destination">Destination</option>
+                <option value="Region">Region</option>
+                <option value="Country">Country</option>
+            </select>
+        </div>
+        <div id="favorites-results"></div>
+    </div>
+
+
+    <footer>
+        <section class="pagination">
+            <button id="prev-page-btn" class="prev-page">Back</button>
+            
+            <button id="next-page-btn" class="next-page">Next</button>
+        </section>
+
+        <p class="data-info">
+                <h3> 
+                    Data provided by europe-destinations.csv 
+                </h3> 
+            </p>
+        
+    </footer>    
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="lab3.js"></script>
 </body>

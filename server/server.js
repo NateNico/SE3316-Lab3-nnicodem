@@ -99,7 +99,7 @@ app.get('/destinations/:id', (req, res) => {
 app.get('/destinations', (req, res) => {
     res.json(destinations);
 });
-
+/*
 // Create a new favorite list
 app.post('/lists/:name', (req, res) => {
     const listName = req.params.name;
@@ -113,6 +113,30 @@ app.post('/lists/:name', (req, res) => {
     writeLists(lists);
     res.status(201).json({ message: `List '${listName}' created.` });
 });
+*/
+
+// Create a new favorite list
+app.post('/lists/:name', (req, res) => {
+    const listName = req.params.name;
+    console.log(`Received request to create list: ${listName}`); // Log the list name
+
+    const lists = readLists();
+    console.log('Current lists:', lists); // Log the current state of the lists
+
+    if (lists[listName]) {
+        console.log(`List '${listName}' already exists.`); // Log if list already exists
+        return res.status(400).json({ error: 'List name already exists.' });
+    }
+
+    lists[listName] = [];
+    console.log('Updated lists after adding new list:', lists); // Log updated lists before writing
+
+    writeLists(lists);
+    console.log(`List '${listName}' created successfully.`); // Log success message
+
+    res.status(201).json({ message: `List '${listName}' created.` });
+});
+
 
 // Save a list of destination IDs
 app.put('/lists/:name', (req, res) => {

@@ -2,6 +2,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchButton = document.getElementById('search-btn');
     const resultsContainer = document.getElementById('results-container');
     const mapElement = document.getElementById('map');
+    const createListButton = document.getElementById('create-list-btn');
+    const saveListButton = document.getElementById('save-list-btn');
+    const viewListButton = document.getElementById('view-list-btn');
+    const deleteListButton = document.getElementById('delete-list-btn');
+    const listNameInput = document.getElementById('list-name');
+    const favoritesContainer = document.getElementById('favorites-results');
 
     // Initialize map
     const map = L.map(mapElement).setView([51.505, -0.09], 5);
@@ -32,7 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (results.length > 0) {
                     results.forEach(dest => {
                         const resultDiv = document.createElement('div');
-                        resultDiv.textContent = `${dest._Destination} - ${dest.Country}`; 
+                        resultDiv.classList.add('destination-item');
+                        resultDiv.innerHTML = `
+                            <input type="checkbox" value="${dest.ID}">
+                            ${dest._Destination} - ${dest.Country}
+                        `;
                         resultsContainer.appendChild(resultDiv);
 
                         if (dest.Latitude && dest.Longitude) {
@@ -41,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 .openPopup();
                         }
                     });
-                    map.setView([results[0].Latitude, results[0].Longitude], 6); 
+                    map.setView([results[0].Latitude, results[0].Longitude], 6);
                 } else {
                     resultsContainer.textContent = 'No matching results found.';
                 }
@@ -53,4 +63,123 @@ document.addEventListener('DOMContentLoaded', () => {
             resultsContainer.textContent = 'An error occurred while fetching the data.';
         }
     });
+
+    // Function to create a new list
+    createListButton.addEventListener('click', async () => {
+        const listName = listNameInput.value.trim();
+        if (!listName) {
+            alert('Please enter a list name.');
+            return;
+        }
+
+        try {
+            await fetch(`http://localhost:3000/lists/${encodeURIComponent(listName)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });            
+
+            if (response.ok) {
+                alert(`List '${listName}' created successfully.`);
+            } else {
+                const error = await response.json();
+                alert(`Error: ${error.error}`);
+            }
+        } catch (error) {
+            console.error('Error creating list:', error);
+            alert('An error occurred while creating the list.');
+        }
+    });
+
+    // Function to save destinations to a list
+    saveListButton.addEventListener('click', async () => {
+        const listName = listNameInput.value.trim();
+        if (!listName) {
+            alert('Please enter a list name.');
+            return;
+        }
+
+        const destinationIDs = Array.from(document.querySelectorAll('.destination-item input:checked'))
+            .map(input => parseInt(input.value));
+
+        if (destinationIDs.length === 0) {
+            alert('Please select destinations to save.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/lists/${encodeURIComponent(listName)}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ destinationIDs })
+            });
+
+            if (response.ok) {
+                alert(`Destinations saved to '${listName}' successfully.`);
+            } else {
+                const error = await response.json();
+                alert(`Error: ${error.error}`);
+            }
+        } catch (error) {
+            console.error('Error saving list:', error);
+            alert('An error occurred while saving the list.');
+        }
+    });
+
+    // Function to view a list
+    viewListButton.addEventListener('click', async () => {
+        const listName = listNameInput.value.trim();
+        if (!listName) {
+            alert('Please enter a list name.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/lists/${encodeURIComponent(listName)}/details`);
+            if (response.ok) {
+                const destinations = await response.json();
+                favoritesContainer.innerHTML = '';
+                destinations.forEach(dest => {
+                    const destDiv = document.createElement('div');
+                    if (dest.error) {
+                        destDiv.textContent = dest.error;
+                    } else {
+                        destDiv.textContent = `${dest._Destination} - ${dest.Country}`;
+                    }
+                    favoritesContainer.appendChild(destDiv);
+                });
+            } else {
+                const error = await response.json();
+                alert(`Error: ${error.error}`);
+            }
+        } catch (error) {
+            console.error('Error viewing list:', error);
+            alert('An error occurred while viewing the list.');
+        }
+    });
+
+    // Function to delete a list
+    deleteListButton.addEventListener('click', async () => {
+        const listName = listNameInput.value.trim();
+        if (!listName) {
+            alert('Please enter a list name.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/lists/${encodeURIComponent(listName)}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                alert(`List '${listName}' deleted successfully.`);
+            } else {
+                const error = await response.json();
+                alert(`Error: ${error.error}`);
+            }
+        } catch (error) {
+            console.error('Error deleting list:', error);
+            alert('An error occurred while deleting the list.');
+        }
+    });
 });
+
