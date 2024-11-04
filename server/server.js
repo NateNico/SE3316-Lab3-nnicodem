@@ -12,7 +12,7 @@ app.use(express.static('public'));
 
 // Enable CORS for all routes (optional, for development purposes)
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*'); // Adjust as needed for production
+    res.header('Access-Control-Allow-Origin', '*'); 
     res.header('Access-Control-Allow-Headers', 'Content-Type');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     next();
@@ -64,7 +64,7 @@ app.get('/', (req, res) => {
 // Search route
 app.get('/destinations/search', (req, res) => {
     const { field, pattern, n } = req.query;
-    const limit = parseInt(n) || destinations.length; // Default to all results if `n` is not provided
+    const limit = parseInt(n) || destinations.length; 
 
     if (!field || !pattern) {
         return res.status(400).json({ error: 'Field and pattern are required for search.' });
