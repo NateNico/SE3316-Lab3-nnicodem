@@ -1,35 +1,62 @@
+// MapManager class to manage map-related functionalities
+export class MapManager {
+    constructor() {
+        this.map = L.map('map').setView([51.505, -0.09], 5); // Set initial coordinates and zoom level
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(this.map);
+
+        this.markers = L.layerGroup().addTo(this.map);
+    }
+
+    displayLocation(lat, lng) {
+        this.map.setView([lat, lng], 10); // Zoom to a specific location
+        L.marker([lat, lng]).addTo(this.map); // Add a marker to the map
+    }
+
+    clearMarkers() {
+        this.markers.clearLayers();
+    }
+
+    addMarker(lat, lng, popupText = '') {
+        const marker = L.marker([lat, lng]);
+        if (popupText) {
+            marker.bindPopup(popupText);
+        }
+        this.markers.addLayer(marker);
+    }
+
+    adjustZoomToFitMarkers() {
+        if (this.markers.getLayers().length > 0) {
+            this.map.fitBounds(this.markers.getBounds());
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    const mapManager = new MapManager();
 
     // Initialize variables
     let currentPage = 1;
     let resultsPerPage = 10;
     let totalPages = 1;
     let searchResults = [];
-    let markers = L.layerGroup();
-
-    // Initialize the map
-    const map = L.map('map').setView([54.5260, 15.2551], 4); // Centered on Europe
-
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    markers.addTo(map);
 
     // Perform search and display results
     async function performSearch() {
         const field = document.getElementById('search-field').value;
         const pattern = document.getElementById('search-bar').value.trim();
-        const n = ''; // Fetch all matches first; we'll handle pagination
+        const n = document.getElementById('search-limit').value || ''; // Fetch the limit if provided
 
-        if (!pattern) {
-            alert('Please enter a search term.');
+        if (field === 'None' || !pattern) {
+            alert('Please select a valid search field and enter a search term.');
             return;
         }
 
         try {
-            const response = await fetch(`/destinations/search?field=${encodeURIComponent(field)}&pattern=${encodeURIComponent(pattern)}&n=${n}`);
+            // Ensure the full URL for testing if necessary
+            const response = await fetch(`http://localhost:3000/destinations/search?field=${encodeURIComponent(field)}&pattern=${encodeURIComponent(pattern)}&n=${n}`);
             if (response.ok) {
                 const data = await response.json();
                 searchResults = data;
@@ -37,66 +64,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 await displayResults();
             } else {
                 const error = await response.json();
-                alert(error.error);
+                alert(`Error: ${error.error || 'Unexpected error occurred.'}`);
                 document.getElementById('search-results').innerHTML = '';
-                markers.clearLayers();
+                document.getElementById('no-results-message').style.display = 'block';
+                mapManager.clearMarkers();
             }
         } catch (error) {
             console.error('Error performing search:', error);
+            alert('A network error occurred. Please try again later.');
         }
     }
 
-    // Replace your existing displayResults function with this updated version
+    // Display results on the page and map
     async function displayResults() {
+        document.getElementById('no-results-message').style.display = 'none';
         resultsPerPage = parseInt(document.getElementById('search-limit').value) || searchResults.length;
         totalPages = Math.ceil(searchResults.length / resultsPerPage);
 
-        const sortField = document.getElementById('sort-field').value;
+        if (searchResults.length === 0) {
+            document.getElementById('no-results-message').style.display = 'block';
+            document.getElementById('search-results').innerHTML = '';
+            mapManager.clearMarkers();
+            return;
+        }
 
-        // Use the searchResults directly
-        let detailedResults = searchResults.slice();
-
-        // Sort the detailed results
-        detailedResults.sort((a, b) => {
-            const fieldA = a[sortField] ? a[sortField].toLowerCase() : '';
-            const fieldB = b[sortField] ? b[sortField].toLowerCase() : '';
-            return fieldA.localeCompare(fieldB);
-        });
-
-        // Paginate the sorted results
         const startIndex = (currentPage - 1) * resultsPerPage;
         const endIndex = startIndex + resultsPerPage;
-        const currentResults = detailedResults.slice(startIndex, endIndex);
+        const currentResults = searchResults.slice(startIndex, endIndex);
 
         const resultsContainer = document.getElementById('search-results');
         resultsContainer.innerHTML = '';
-        markers.clearLayers();
+        mapManager.clearMarkers();
 
         for (const dest of currentResults) {
             createDestinationElement(dest, resultsContainer);
-            addMarker(dest);
+            mapManager.addMarker(dest.Latitude, dest.Longitude, `<b>${sanitizeText(dest.Destination)}</b><br>${sanitizeText(dest.Country)}`);
         }
 
+        mapManager.adjustZoomToFitMarkers();
         document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
     }
-    
 
-    // Fetch destination details by ID
-    async function fetchDestinationById(id) {
-        try {
-            const response = await fetch(`/destinations/${id}`);
-            if (response.ok) {
-                return await response.json();
-            } else {
-                return null;
-            }
-        } catch (error) {
-            console.error('Error fetching destination:', error);
-            return null;
-        }
-    }
-
-    // Create destination element in the DOM
+    // Create a destination element in the DOM
     function createDestinationElement(dest, container) {
         const destinationElement = document.createElement('section');
         destinationElement.classList.add('destination');
@@ -125,13 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
         container.appendChild(destinationElement);
     }
 
-    // Add marker to the map
-    function addMarker(dest) {
-        const marker = L.marker([dest.Latitude, dest.Longitude])
-            .bindPopup(`<b>${sanitizeText(dest.Destination)}</b><br>${sanitizeText(dest.Country)}`);
-        markers.addLayer(marker);
-    }
-
     // Pagination controls
     document.getElementById('prev-page-btn').addEventListener('click', () => {
         if (currentPage > 1) {
@@ -146,16 +148,23 @@ document.addEventListener('DOMContentLoaded', () => {
             displayResults();
         }
     });
-    
 
     // Sort control for search results
-    document.getElementById('sort-field').addEventListener('change', displayResults);
+    document.getElementById('sort-field').addEventListener('change', () => {
+        const sortField = document.getElementById('sort-field').value;
+        if (sortField !== 'None') {
+            searchResults.sort((a, b) => {
+                if (a[sortField] < b[sortField]) return -1;
+                if (a[sortField] > b[sortField]) return 1;
+                return 0;
+            });
+            currentPage = 1;
+            displayResults();
+        }
+    });
 
     // Search button
     document.getElementById('search-btn').addEventListener('click', performSearch);
-
-    // Favorites functionality (unchanged from previous implementation)
-    // ... [Keep the favorites functionality code as previously provided]
 
     // Input sanitization function
     function sanitizeText(text) {
@@ -163,9 +172,4 @@ document.addEventListener('DOMContentLoaded', () => {
         div.appendChild(document.createTextNode(text));
         return div.innerHTML;
     }
-    // Initialize MapManager in your main script
-    //document.addEventListener('DOMContentLoaded', () => {
-        //const mapManager = new MapManager();
-    //})
-
 });

@@ -8,7 +8,7 @@ const port = 3000;
 
 // Middleware
 app.use(bodyParser.json());
-app.use(express.static('public')); // Serve static files from 'public' directory
+app.use(express.static('public'));
 
 // Enable CORS for all routes (optional, for development purposes)
 app.use((req, res, next) => {
@@ -23,12 +23,10 @@ let destinations = [];
 fs.createReadStream(path.join(__dirname, 'data', 'europe-destinations.csv'))
     .pipe(csv())
     .on('data', (data) => {
-        // Convert numerical fields only if they contain valid data
         data.ID = data.ID && !isNaN(data.ID) ? parseInt(data.ID) : destinations.length + 1;
         data.Latitude = data.Latitude && !isNaN(data.Latitude) ? parseFloat(data.Latitude) : null;
         data.Longitude = data.Longitude && !isNaN(data.Longitude) ? parseFloat(data.Longitude) : null;
 
-        // Normalize field names (remove spaces and convert to underscores)
         const normalizedData = {};
         for (const key in data) {
             const normalizedKey = key.replace(/\s+/g, '_');
@@ -41,22 +39,21 @@ fs.createReadStream(path.join(__dirname, 'data', 'europe-destinations.csv'))
         console.log('CSV file successfully processed.');
     });
 
-// Simple file-based storage for favorite lists
-const listsFile = 'data/lists.json';
+// File-based storage for favorite lists
+const listsFile = path.join(__dirname, 'data', 'lists.json');
 
-// Utility function to read lists
+// Utility functions for favorite lists
 function readLists() {
     try {
-        const data = fs.readFileSync(listsFile);
-        return JSON.parse(data);
+        const data = fs.readFileSync(listsFile, 'utf8');
+        return JSON.parse(data) || {};
     } catch (error) {
         return {};
     }
 }
 
-// Utility function to write lists
 function writeLists(lists) {
-    fs.writeFileSync(listsFile, JSON.stringify(lists));
+    fs.writeFileSync(listsFile, JSON.stringify(lists, null, 2), 'utf8');
 }
 
 // Root route
@@ -77,6 +74,10 @@ app.get('/destinations/search', (req, res) => {
         const value = dest[field];
         return value && value.toString().toLowerCase().includes(pattern.toLowerCase());
     });
+
+    if (filteredResults.length === 0) {
+        return res.status(404).json({ error: 'No matching results found.' });
+    }
 
     const limitedResults = filteredResults.slice(0, limit);
     res.json(limitedResults);
@@ -99,7 +100,83 @@ app.get('/destinations', (req, res) => {
     res.json(destinations);
 });
 
-// Start the server (only one instance)
+// Create a new favorite list
+app.post('/lists/:name', (req, res) => {
+    const listName = req.params.name;
+    const lists = readLists();
+
+    if (lists[listName]) {
+        return res.status(400).json({ error: 'List name already exists.' });
+    }
+
+    lists[listName] = [];
+    writeLists(lists);
+    res.status(201).json({ message: `List '${listName}' created.` });
+});
+
+// Save a list of destination IDs
+app.put('/lists/:name', (req, res) => {
+    const listName = req.params.name;
+    const destinationIDs = req.body.destinationIDs;
+    const lists = readLists();
+
+    if (!lists[listName]) {
+        return res.status(404).json({ error: 'List not found.' });
+    }
+
+    if (!Array.isArray(destinationIDs) || destinationIDs.some(id => isNaN(id))) {
+        return res.status(400).json({ error: 'Invalid destination IDs.' });
+    }
+
+    lists[listName] = destinationIDs;
+    writeLists(lists);
+    res.json({ message: `List '${listName}' updated.` });
+});
+
+// Get a list of destination IDs
+app.get('/lists/:name', (req, res) => {
+    const listName = req.params.name;
+    const lists = readLists();
+
+    if (!lists[listName]) {
+        return res.status(404).json({ error: 'List not found.' });
+    }
+
+    res.json(lists[listName]);
+});
+
+// Delete a list by name
+app.delete('/lists/:name', (req, res) => {
+    const listName = req.params.name;
+    const lists = readLists();
+
+    if (!lists[listName]) {
+        return res.status(404).json({ error: 'List not found.' });
+    }
+
+    delete lists[listName];
+    writeLists(lists);
+    res.json({ message: `List '${listName}' deleted.` });
+});
+
+// Get detailed information for destinations in a list
+app.get('/lists/:name/details', (req, res) => {
+    const listName = req.params.name;
+    const lists = readLists();
+
+    if (!lists[listName]) {
+        return res.status(404).json({ error: 'List not found.' });
+    }
+
+    const detailedList = lists[listName].map(id => {
+        const destination = destinations.find(dest => dest.ID === id);
+        return destination || { error: `Destination ID ${id} not found.` };
+    });
+
+    res.json(detailedList);
+});
+
+// Start the server
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
 });

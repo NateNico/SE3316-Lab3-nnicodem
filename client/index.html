@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -15,19 +14,14 @@
             <h1>Europe Travel Explorer</h1>
         </header>
 
-
-        <div id="search-box" class="search-box">
-
+        <div class="search-box">
             <article>
                 <h2>Search Destinations</h2>    
             </article>
 
             <!-- Search Section -->
             <section class="search">
-                <!-- <h2>Search Destinations</h2> -->
-
-                <!-- Dropdown search field -->
-                <label for="search-field"> </label>
+                <label for="search-field">Search Field:</label>
                 <select id="search-field">
                     <option value="None">Select Field</option>
                     <option value="Destination">Destination</option>
@@ -48,8 +42,7 @@
                     <option value="Description">Description</option>
                 </select>
 
-                <!-- Search bar and button -->
-                <label for="search-bar"> </label>
+                <label for="search-bar">Search Term:</label>
                 <input type="text" id="search-bar" maxlength="20" placeholder="Enter search term">
                 <button id="search-btn">Search</button>
                 
@@ -57,78 +50,61 @@
                     <input type="number" id="search-limit" value="10" min="1">
                 </div>
 
+                <!-- Sort Results Control -->
+                <label for="sort-field">Sort By:</label>
+                <select id="sort-field">
+                    <option value="None">Select Option</option>
+                    <option value="Destination">Destination</option>
+                    <option value="Region">Region</option>
+                    <option value="Country">Country</option>
+                    <option value="Category">Category</option>
+                </select>
             </section>
         </div>
 
-      
-
-        <div id="search-box" class="search-box">
-
-            <!-- Search Results -->
+        <div class="search-box">
             <article>
                 <h2>Map View</h2>
             </article>
 
             <div id="search-results" class="search-results">
+                <!-- Placeholder for empty results message -->
+                <div id="no-results-message" class="no-results-message" style="display: none;">No results found. Please try a different search.</div>
                 
                 <!-- Map Section -->
                 <section id="map-section" class="map-section">
-                    <!-- <h1>Map View</h1> -->
                     <div id="map"></div>
                 </section>
 
-                    <!-- Include Leaflet JS -->
+                <!-- Include Leaflet JS -->
                 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
             </div>
         </div>
 
-
-        <div id="search-box" class="search-box">
-
+        <div class="search-box">
             <article>
                 <h2>FAVORITE LISTS</h2>
             </article>
             
-            <!-- Favorites Section -->
             <section class="favorites-section">
-                <!-- <h2>FAVORITE LISTS</h2> -->
-
-                <!-- Horizontal alignment for List Name and Sort Favorites By fields -->
                 <div class="favorites-fields">
-                    
-
                     <div class="favorites-sort-controls">
-                        <label for="favorites-sort-field"> </label>
+                        <label for="favorites-sort-field">Sort Favorites By:</label>
                         <select id="favorites-sort-field">
-                            <option value="None"> Sort Favorites By:</option>
+                            <option value="None">Select Option</option>
                             <option value="Destination">Destination</option>
                             <option value="Region">Region</option>
                             <option value="Country">Country</option>
                             <option value="Category">Category</option>
-                            <option value="Latitude">Latitude</option>
-                            <option value="Longitude">Longitude</option>
-                            <option value="Tourists">Approximate Annual Tourists</option>
-                            <option value="Currency">Currency</option>
-                            <option value="Religion">Majority Religion</option>
-                            <option value="Foods">Famous Foods</option>
-                            <option value="Language">Language</option>
-                            <option value="Visit_Time">Best Time to Visit</option>
-                            <option value="Living_Cost">Cost of Living</option>
-                            <option value="Safety">Safety</option>
-                            <option value="Culture">Cultural Significance</option>
-                            <option value="Description">Description</option>
                         </select>
                     </div>
 
                     <div class="favorites-controls">
-                    <label for="list-name"> </label>
-                    <input type="text" id="list-name" placeholder="Enter list name">
+                        <label for="list-name">List Name:</label>
+                        <input type="text" id="list-name" placeholder="Enter list name">
+                    </div>
                 </div>
 
-                </div>
-
-                <!-- Horizontal alignment for buttons -->
                 <div class="favorites-buttons">
                     <button id="create-list-btn">Create List</button>
                     <button id="save-list-btn">Save to List</button>
@@ -140,23 +116,18 @@
             </section>  
         </div>
 
-    
-        <div id="search-box" class="search-box">
+        <div class="search-box">
             <footer>
                 <section class="pagination">
                     <button id="prev-page-btn" class="prev-page">Back</button>
-
                     <button id="next-page-btn" class="next-page">Next</button>
                 </section>
-                <p class="data-info">
-                    <h3> Data provided by europe-destinations.csv </h3> 
-                </p>
+                <p class="data-info">Data provided by europe-destinations.csv</p>
             </footer>    
         </div>
 
-            <!-- Include the lab3.js file -->
-            <script src="lab3.js"></script>
-
+        <!-- Include the lab3.js file -->
+        <script src="lab3.js"></script>
   </body>
 </html>
 
