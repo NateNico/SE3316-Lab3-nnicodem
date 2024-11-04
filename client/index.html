@@ -46,14 +46,19 @@
             <button id="view-list-btn">View List</button>
             <button id="delete-list-btn">Delete List</button>
         </div>
-        <div class="favorites-search">
-            <h3>Search Favorites</h3>
-            <input type="text" id="favorites-search-term" placeholder="Search within the list">
-            <button id="search-favorites-btn">Search</button>
+
+
+        <div class="favorites-sort-controls">
+            <label for="favorites-sort-field">Sort Favorites By:</label>
+            <select id="favorites-sort-field">
+                <option value="None">Select Field</option>
+                <option value="Destination">Destination</option>
+                <option value="Region">Region</option>
+                <option value="Country">Country</option>
+            </select>
         </div>
         <div id="favorites-results"></div>
     </div>
-    
 
 
     <footer>
