@@ -68,6 +68,14 @@ section.province input[type="checkbox"] {
     margin-right: 5px;
     accent-color: #835510;
 }
+#search-box {
+    background-color: #5a8ebc;
+    border: 2px solid #d41491;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 8px;
+}
+
 
 /* Search Results Content Block */
 .search-results {
@@ -78,16 +86,17 @@ section.province input[type="checkbox"] {
     border-radius: 8px;
 }
 
-/* Footer */
+/* Footer
 footer {
-    background-color: #705db8;
-    color: #ffffff;
+    /* background-color: #705db8; */
+    /* color: #ffffff; 
     text-align: center;
     padding: 10px 0;
     position: relative;
     bottom: 0;
-    width: 100%;
+    /* width: 100%; 
 }
+*/
 
 /* Responsive Design */
 @media (max-width: 768px) {
@@ -280,15 +289,16 @@ button:hover {
 
 
 
-/* The layout of the footer */
+ /* The layout of the footer */
 footer {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: #6c5b7b; /* Adjust as needed for the background color */
+    background-color: #6c5b7b;
     padding: 10px;
-    color: white; /* Adjust text color as needed */
+    color: white; 
 }
+
 .pagination {
     display: flex;
     justify-content: space-between;

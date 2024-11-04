@@ -15,11 +15,13 @@
             <h1>Europe Travel Explorer</h1>
         </header>
 
-        <article>
-            <h2>Search Destinations</h2>    
-        </article>
 
-        <div id="search-results" class="search-results">
+        <div id="search-box" class="search-box">
+
+            <article>
+                <h2>Search Destinations</h2>    
+            </article>
+
             <!-- Search Section -->
             <section class="search">
                 <!-- <h2>Search Destinations</h2> -->
@@ -60,28 +62,33 @@
 
       
 
-        <!-- Search Results -->
-        <article>
-            <h2>Map View</h2>
-        </article>
+        <div id="search-box" class="search-box">
 
-        <div id="search-results" class="search-results">
-            
-            <!-- Map Section -->
-            <section id="map-section" class="map-section">
-                <!-- <h1>Map View</h1> -->
-                <div id="map"></div>
-            </section>
+            <!-- Search Results -->
+            <article>
+                <h2>Map View</h2>
+            </article>
 
-                <!-- Include Leaflet JS -->
-            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+            <div id="search-results" class="search-results">
+                
+                <!-- Map Section -->
+                <section id="map-section" class="map-section">
+                    <!-- <h1>Map View</h1> -->
+                    <div id="map"></div>
+                </section>
 
+                    <!-- Include Leaflet JS -->
+                <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+            </div>
         </div>
 
-        <article>
-            <h2>FAVORITE LISTS</h2>
-        </article>
-        <div id="search-results" class="search-results">
+
+        <div id="search-box" class="search-box">
+
+            <article>
+                <h2>FAVORITE LISTS</h2>
+            </article>
             
             <!-- Favorites Section -->
             <section class="favorites-section">
@@ -133,31 +140,22 @@
             </section>  
         </div>
 
-        <!--
-            ( Map Section )
-            <section id="map-section" class="map-section">
-            <h1>Map View</h1>
-            <div id="map"></div>
-            </section>
+    
+        <div id="search-box" class="search-box">
+            <footer>
+                <section class="pagination">
+                    <button id="prev-page-btn" class="prev-page">Back</button>
 
-            ( Include Leaflet JS )
-            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-            -->
+                    <button id="next-page-btn" class="next-page">Next</button>
+                </section>
+                <p class="data-info">
+                    <h3> Data provided by europe-destinations.csv </h3> 
+                </p>
+            </footer>    
+        </div>
 
-        <footer>
-            <section class="pagination">
-                <button id="prev-page-btn" class="prev-page">Back</button>
-
-                <button id="next-page-btn" class="next-page">Next</button>
-            </section>
-            <p class="data-info">
-                <h3> Data provided by europe-destinations.csv </h3> 
-            </p>
-        </footer>    
-
-
-        <!-- Include the lab3.js file -->
-        <script src="lab3.js"></script>
+            <!-- Include the lab3.js file -->
+            <script src="lab3.js"></script>
 
   </body>
 </html>
