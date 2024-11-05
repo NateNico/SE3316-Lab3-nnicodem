@@ -11,25 +11,42 @@
     <header>
         <h1>Europe Travel Explorer</h1>
     </header>
+
     
     <div class="search-box">
         <h2>Search Destinations</h2>
-        <label for="search-field">Field:</label>
-        <select id="search-field">
-            <option value="Country">Country</option>
-            <option value="Region">Region</option>
-            <option value="Category">Category</option>
-            <!-- Add other options as needed -->
-        </select>
+        <div class="search-fields-container">
+    
+            <div class="search-limit">
+                <label for="search-limit"> </label>
+                <input type="number" id="search-limit" placeholder="Enter Search Results" min="1">
+            </div>
+    
+            <div class="search-field">
+                <label for="search-field"> </label>
+                <select id="search-field">
+                    <option value="None">Select Field</option>
+                    <option value="_Destination">Destination</option>
+                    <option value="ID">ID</option>
+                    <option value="Region">Region</option>
+                    <option value="Country">Country</option>
+                    <option value="Description">Description</option>
+                </select>
+            </div>
+    
+            <div class="search-term">
+                <label for="search-bar"> </label>
+                <input type="text" id="search-bar" placeholder="Enter search term">
+            </div>
 
-        <label for="search-bar">Search Term:</label>
-        <input type="text" id="search-bar" placeholder="Enter search term">
-        <button id="search-btn">Search</button>
+            <button id="search-btn">Search</button>
+
+        </div>
     </div>
-
+    
+    
     <div id="search-results" class="search-results">
-        <h2>Results</h2>
-        <div id="results-container"></div>
+            <div id="results-container"></div>
     </div>
 
     <div class="map-section">
@@ -37,25 +54,15 @@
         <div id="map"></div>
     </div>
 
+
     <div class="favorites-section">
-        <h2>Favorites Management</h2>
+        <h2>Favorite Lists Management</h2>
         <input type="text" id="list-name" placeholder="Enter list name">
         <div class="favorites-buttons">
             <button id="create-list-btn">Create List</button>
             <button id="save-list-btn">Save to List</button>
             <button id="view-list-btn">View List</button>
             <button id="delete-list-btn">Delete List</button>
-        </div>
-
-
-        <div class="favorites-sort-controls">
-            <label for="favorites-sort-field">Sort Favorites By:</label>
-            <select id="favorites-sort-field">
-                <option value="None">Select Field</option>
-                <option value="Destination">Destination</option>
-                <option value="Region">Region</option>
-                <option value="Country">Country</option>
-            </select>
         </div>
         <div id="favorites-results"></div>
     </div>

@@ -15,17 +15,32 @@ document.addEventListener('DOMContentLoaded', () => {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+    // Add search functionality
     searchButton.addEventListener('click', async () => {
         const field = document.getElementById('search-field').value.trim();
         const pattern = document.getElementById('search-bar').value.trim();
+        const limit = parseInt(document.getElementById('search-limit').value.trim(), 10);
+
+        const validFields = ['_Destination', 'Region', 'Country', 'Category', 'Latitude', 'Longitude', 'ID', 'Approximate_Annual_Tourists', 'Currency', 'Majority_Religion', 'Famous_Foods', 'Language', 'Best_Time_to_Visit', 'Cost_of_Living', 'Safety', 'Cultural_Significance', 'Description'];
+
+        const normalizedField = field.replace(/\s+/g, '_');
+        if (!validFields.includes(normalizedField)) {
+            alert('Invalid field selected. Please choose a valid field.');
+            return;
+        }
 
         if (!field || !pattern) {
             alert('Please enter both a field and a search term.');
             return;
         }
 
+        if (isNaN(limit) || limit <= 0) {
+            alert('Please enter a valid number for the search limit.');
+            return;
+        }
+
         try {
-            const response = await fetch(`http://localhost:3000/destinations/search?field=${encodeURIComponent(field)}&pattern=${encodeURIComponent(pattern)}`);
+            const response = await fetch(`http://localhost:3000/destinations/search?field=${encodeURIComponent(normalizedField)}&pattern=${encodeURIComponent(pattern)}&limit=${limit}`);
             if (response.ok) {
                 const results = await response.json();
                 resultsContainer.innerHTML = '';
@@ -36,13 +51,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (results.length > 0) {
-                    results.forEach(dest => {
+                    results.slice(0, limit).forEach(dest => {
                         const resultDiv = document.createElement('div');
                         resultDiv.classList.add('destination-item');
                         resultDiv.innerHTML = `
-                            <input type="checkbox" value="${dest.ID}">
-                            ${dest._Destination} - ${dest.Country}
+                            <div class="checkbox-container">
+                                <input type="checkbox" value="${dest.ID}"> <label>Select for Favorites</label>
+                            </div>
+                            <h3 style="font-size: 1.5em; font-weight: bold; margin-bottom: 10px;">${dest._Destination}</h3>
+                            <p><strong>Region:</strong> ${dest.Region}</p>
+                            <p><strong>Country:</strong> ${dest.Country}</p>
+                            <p><strong>Category:</strong> ${dest.Category}</p>
+                            <p><strong>Latitude:</strong> ${dest.Latitude}</p>
+                            <p><strong>Longitude:</strong> ${dest.Longitude}</p>
+                            <p><strong>Approximate Annual Tourists:</strong> ${dest.Approximate_Annual_Tourists}</p>
+                            <p><strong>Currency:</strong> ${dest.Currency}</p>
+                            <p><strong>Majority Religion:</strong> ${dest.Majority_Religion}</p>
+                            <p><strong>Famous Foods:</strong> ${dest.Famous_Foods}</p>
+                            <p><strong>Language:</strong> ${dest.Language}</p>
+                            <p><strong>Best Time to Visit:</strong> ${dest.Best_Time_to_Visit}</p>
+                            <p><strong>Cost of Living:</strong> ${dest.Cost_of_Living}</p>
+                            <p><strong>Safety:</strong> ${dest.Safety}</p>
+                            <p><strong>Cultural Significance:</strong> ${dest.Cultural_Significance}</p>
+                            <p><strong>Description:</strong> ${dest.Description}</p>
+                            <p><strong>ID:</strong> ${dest.ID}</p>
+                            <hr style="border-top: 1px solid #ccc; margin: 15px 0;">
                         `;
+
                         resultsContainer.appendChild(resultDiv);
 
                         if (dest.Latitude && dest.Longitude) {
@@ -64,7 +99,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Function to create a new list
+    // Function to save selected results to a favorites list
+    async function saveToFavoritesList(listName, destinationIDs) {
+        try {
+            const response = await fetch(`http://localhost:3000/lists/${encodeURIComponent(listName)}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ destinationIDs })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                console.error('Error saving list:', error);
+                alert(`Error saving list: ${error.error}`);
+            }
+        } catch (error) {
+            console.error('Error saving list:', error);
+            alert('An error occurred while saving the list.');
+        }
+    }
+
+    // Create a new list
     createListButton.addEventListener('click', async () => {
         const listName = listNameInput.value.trim();
         if (!listName) {
@@ -73,10 +128,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            await fetch(`http://localhost:3000/lists/${encodeURIComponent(listName)}`, {
+            const response = await fetch(`http://localhost:3000/lists/${encodeURIComponent(listName)}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }
-            });            
+            });
 
             if (response.ok) {
                 alert(`List '${listName}' created successfully.`);
@@ -90,77 +145,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-        // Function to search within a favorites list
-    const searchFavoritesButton = document.getElementById('search-favorites-btn');
-    const favoritesSearchInput = document.getElementById('favorites-search-term');
-
-    searchFavoritesButton.addEventListener('click', async () => {
-        const listName = listNameInput.value.trim();
-        const searchTerm = favoritesSearchInput.value.trim().toLowerCase();
-
-        if (!listName) {
-            alert('Please enter a list name.');
-            return;
-        }
-
-        if (!searchTerm) {
-            alert('Please enter a search term.');
-            return;
-        }
-
-        try {
-            const response = await fetch(`/lists/${encodeURIComponent(listName)}/details`);
-            if (response.ok) {
-                const destinations = await response.json();
-                favoritesContainer.innerHTML = '';
-
-                const filteredDestinations = destinations.filter(dest => {
-                    return dest && dest._Destination && dest._Destination.toLowerCase().includes(searchTerm);
-                });
-
-                if (filteredDestinations.length > 0) {
-                    filteredDestinations.forEach(dest => {
-                        const destDiv = document.createElement('div');
-                        destDiv.textContent = `${dest._Destination} - ${dest.Country}`;
-                        favoritesContainer.appendChild(destDiv);
-                    });
-                } else {
-                    favoritesContainer.textContent = 'No matching destinations found in this list.';
-                }
-            } else {
-                const error = await response.json();
-                alert(`Error: ${error.error}`);
-            }
-        } catch (error) {
-            console.error('Error searching within the list:', error);
-            alert('An error occurred while searching the list.');
-        }
-    });
-
-
-    // Function to save destinations to a list
+    // Save selected destinations to a list
     saveListButton.addEventListener('click', async () => {
         const listName = listNameInput.value.trim();
         if (!listName) {
             alert('Please enter a list name.');
             return;
         }
-
+    
+        // Get checked destinations from the search results
         const destinationIDs = Array.from(document.querySelectorAll('.destination-item input:checked'))
             .map(input => parseInt(input.value));
-
+    
         if (destinationIDs.length === 0) {
             alert('Please select destinations to save.');
             return;
         }
-
+    
         try {
-            const response = await fetch(`/lists/${encodeURIComponent(listName)}`, {
+            // Double-check that the URL is correctly formed
+            const response = await fetch(`http://localhost:3000/lists/${encodeURIComponent(listName)}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ destinationIDs })
             });
-
+    
             if (response.ok) {
                 alert(`Destinations saved to '${listName}' successfully.`);
             } else {
@@ -172,8 +181,9 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('An error occurred while saving the list.');
         }
     });
-
-    // Function to view a list
+    
+    
+    // View a list
     viewListButton.addEventListener('click', async () => {
         const listName = listNameInput.value.trim();
         if (!listName) {
@@ -182,16 +192,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch(`/lists/${encodeURIComponent(listName)}/details`);
+            const response = await fetch(`http://localhost:3000/lists/${encodeURIComponent(listName)}/details`);
             if (response.ok) {
                 const destinations = await response.json();
                 favoritesContainer.innerHTML = '';
                 destinations.forEach(dest => {
                     const destDiv = document.createElement('div');
+                    destDiv.classList.add('destination-item');
                     if (dest.error) {
                         destDiv.textContent = dest.error;
                     } else {
-                        destDiv.textContent = `${dest._Destination} - ${dest.Country}`;
+                        destDiv.innerHTML = `
+                            <h3 style="font-size: 1.5em; font-weight: bold; margin-bottom: 10px;">${dest._Destination}</h3>
+                            <p><strong>Region:</strong> ${dest.Region}</p>
+                            <p><strong>Country:</strong> ${dest.Country}</p>
+                            <p><strong>Category:</strong> ${dest.Category}</p>
+                            <p><strong>Latitude:</strong> ${dest.Latitude}</p>
+                            <p><strong>Longitude:</strong> ${dest.Longitude}</p>
+                            <p><strong>Approximate Annual Tourists:</strong> ${dest.Approximate_Annual_Tourists}</p>
+                            <p><strong>Currency:</strong> ${dest.Currency}</p>
+                            <p><strong>Majority Religion:</strong> ${dest.Majority_Religion}</p>
+                            <p><strong>Famous Foods:</strong> ${dest.Famous_Foods}</p>
+                            <p><strong>Language:</strong> ${dest.Language}</p>
+                            <p><strong>Best Time to Visit:</strong> ${dest.Best_Time_to_Visit}</p>
+                            <p><strong>Cost of Living:</strong> ${dest.Cost_of_Living}</p>
+                            <p><strong>Safety:</strong> ${dest.Safety}</p>
+                            <p><strong>Cultural Significance:</strong> ${dest.Cultural_Significance}</p>
+                            <p><strong>Description:</strong> ${dest.Description}</p>
+                            <p><strong>ID:</strong> ${dest.ID}</p>
+                            <hr style="border-top: 1px solid #ccc; margin: 15px 0;">
+                        `;
+                        
                     }
                     favoritesContainer.appendChild(destDiv);
                 });
@@ -205,7 +236,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Function to delete a list
+
+    // Delete a list
     deleteListButton.addEventListener('click', async () => {
         const listName = listNameInput.value.trim();
         if (!listName) {
@@ -214,12 +246,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch(`/lists/${encodeURIComponent(listName)}`, {
+            const response = await fetch(`http://localhost:3000/lists/${encodeURIComponent(listName)}`, {
                 method: 'DELETE'
             });
 
             if (response.ok) {
                 alert(`List '${listName}' deleted successfully.`);
+                favoritesContainer.innerHTML = ''; // Clear the container after deletion
             } else {
                 const error = await response.json();
                 alert(`Error: ${error.error}`);
@@ -229,5 +262,4 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('An error occurred while deleting the list.');
         }
     });
-});
-
+}); 

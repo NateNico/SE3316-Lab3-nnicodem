@@ -1,52 +1,270 @@
-/* General styling */
+/* General body styling */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
+    background-color: #5b4951;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+    color: #030101; /* Ensure text is visible against the background */
+}
+
+/* Header */
+header {
+    background-color: #6a177e;
+    color: white;
+    padding: 1em;
+    text-align: center;
+    box-shadow: 0px 4px 2px -2px gray;
+}
+
+h1 {
+    margin: 0;
+    font-size: 2em;
+}
+
+/* Container for search fields */
+.search-fields-container {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.search-field,
+.search-limit,
+.search-term {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.search-field label,
+.search-limit label,
+.search-term label {
+    margin-bottom: 5px;
+    color: #ffffff;
+}
+
+#search-btn {
+    margin-top: 5px;
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #a771e4;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+#search-btn:hover {
+    background-color: #331948;
+}
+
+/* Search Box */
+.search-box {
+    background-color: #6d5a8d;
+    padding: 20px;
+    margin: 20px auto;
+    border-radius: 8px;
+    width: calc(50% - 40px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-box label,
+.search-box h2 {
+    color: #ffffff;
+}
+
+#search-field,
+#search-limit,
+#search-bar {
+    padding: 8px;
+    font-size: 1em;
+    border: 2px solid #4d4343;
+    border-radius: 4px;
+    margin: 5px 0;
+}
+
+/* Center the header within the search box */
+.search-box h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Modify the container to include the search button */
+.search-fields-container {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* Adjust the search button styling */
+#search-btn {
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #a771e4;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    height: 100%; /* Ensures it aligns with input fields */
+}
+
+
+/* Search Results */
+.search-results {
+    background-color: #f0f8ff;
+    border: 2px solid #ffa500;
+    padding: 20px;
+    margin: 20px auto;
+    border-radius: 8px;
+    width: calc(80% - 40px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-results h2 {
+    margin-top: 0;
+}
+/* Center the Results heading */
+#results-container h2 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+.checkbox-container {
+    border: 2px solid #4d4343;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    background-color: #356983;
+}
+
+.checkbox-container input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.checkbox-container label {
+    font-size: 1em;
     color: #333;
 }
 
-/* Header styling */
-header {
-    background-color: #6a177e;
-    color: #fff;
-    padding: 1rem;
+
+
+/* Map Section */
+.map-section {
+    margin: 20px auto;
+    width: calc(90% - 40px);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
 
-/* Search box styling */
-.search-box {
-    margin: 20px;
-    padding: 15px;
-    background-color: #e0e0e0;
-    border-radius: 8px;
+#map {
+    height: 500px;
+    border: 2px solid #4d4343;
+    border-radius: 4px;
 }
 
-/* Results styling */
-.search-results {
-    margin: 20px;
-    padding: 15px;
-    background-color: #e0f7fa;
+/* Favorites Section */
+.favorites-section {
+    background-color: #6d5a8d;
+    padding: 20px;
+    margin: 20px auto;
     border-radius: 8px;
+    width: calc(60% - 40px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: #ffffff;
+    text-align: center;
 }
 
-#results-container {
+.favorites-buttons button {
+    padding: 8px 15px;
+    font-size: 1em;
+    background-color: #61337a;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    margin: 5px;
+}
+
+.favorites-buttons button:hover {
+    background-color: #4d0462;
+}
+
+#list-name {
+    width: 50%;
+    padding: 8px;
+    font-size: 1em;
+    border: 2px solid #4d4343;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+/* Favorites Results */
+#favorites-results {
+    background-color: #f0f8ff;
+    border: 2px solid #ffa500;
+    padding: 15px;
+    border-radius: 8px;
     margin-top: 10px;
+    color: #000000;
+    text-align: left; /* Aligns text to the left */
 }
 
-/* Map section styling */
-.map-section {
-    margin: 20px;
+.favorites-section {
+    background-color: #6d5a8d;
+    padding: 20px;
+    margin: 20px auto;
+    border-radius: 8px;
+    width: calc(60% - 40px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: #ffffff;
+    /* Remove text-align: center; */
 }
 
-#map {
-    width: 100%;
-    height: 500px;
-    border: 2px solid #ccc;
-}
-#map {
-    height: 500px;
-    width: 100%;
+
+/* Pagination Section */
+footer {
+    background-color: #705db8;
+    color: #ffffff;
+    text-align: center;
+    padding: 10px 0;
 }
 
+.pagination button {
+    padding: 8px 15px;
+    font-size: 1em;
+    background-color: #a771e4;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    margin: 5px;
+}
+
+.pagination button:hover {
+    background-color: #331948;
+}
+
+/* Data Info */
+.data-info h3 {
+    color: #ffffff;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .search-box,
+    .favorites-section,
+    .search-results,
+    .map-section {
+        width: 90%;
+    }
+
+    .search-fields-container {
+        flex-direction: column;
+    }
+}

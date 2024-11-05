@@ -63,15 +63,22 @@ app.get('/', (req, res) => {
 
 // Search route
 app.get('/destinations/search', (req, res) => {
-    const { field, pattern, n } = req.query;
-    const limit = parseInt(n) || destinations.length; 
+    const { field, pattern, limit } = req.query;
 
     if (!field || !pattern) {
         return res.status(400).json({ error: 'Field and pattern are required for search.' });
     }
 
+    // Normalize field to match the format in `destinations`
+    const normalizedField = field.replace(/\s+/g, '_');
+
     const filteredResults = destinations.filter(dest => {
-        const value = dest[field];
+        const value = dest[normalizedField];
+
+        if (normalizedField === 'ID') {
+            return value === parseInt(pattern, 10);
+        }
+
         return value && value.toString().toLowerCase().includes(pattern.toLowerCase());
     });
 
@@ -79,9 +86,12 @@ app.get('/destinations/search', (req, res) => {
         return res.status(404).json({ error: 'No matching results found.' });
     }
 
-    const limitedResults = filteredResults.slice(0, limit);
-    res.json(limitedResults);
+    const resultLimit = parseInt(limit, 10);
+    res.json(isNaN(resultLimit) || resultLimit <= 0 ? filteredResults : filteredResults.slice(0, resultLimit));
 });
+
+
+
 
 // Endpoint to get details by ID
 app.get('/destinations/:id', (req, res) => {
@@ -99,21 +109,6 @@ app.get('/destinations/:id', (req, res) => {
 app.get('/destinations', (req, res) => {
     res.json(destinations);
 });
-/*
-// Create a new favorite list
-app.post('/lists/:name', (req, res) => {
-    const listName = req.params.name;
-    const lists = readLists();
-
-    if (lists[listName]) {
-        return res.status(400).json({ error: 'List name already exists.' });
-    }
-
-    lists[listName] = [];
-    writeLists(lists);
-    res.status(201).json({ message: `List '${listName}' created.` });
-});
-*/
 
 // Create a new favorite list
 app.post('/lists/:name', (req, res) => {
@@ -140,6 +135,9 @@ app.post('/lists/:name', (req, res) => {
 
 // Save a list of destination IDs
 app.put('/lists/:name', (req, res) => {
+    console.log(`Updating list: ${req.params.name}`);
+    console.log(`Received destination IDs:`, req.body.destinationIDs);
+
     const listName = req.params.name;
     const destinationIDs = req.body.destinationIDs;
     const lists = readLists();
