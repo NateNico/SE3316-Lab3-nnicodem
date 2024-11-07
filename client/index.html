@@ -19,8 +19,15 @@
     
             <div class="search-limit">
                 <label for="search-limit"> </label>
-                <input type="number" id="search-limit" placeholder="Enter Search Results" min="1">
+                <select id="search-limit" name="search-limit">
+                    <option value="none">Result Per Page</option>
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                </select>
             </div>
+            
     
             <div class="search-field">
                 <label for="search-field"> </label>
@@ -49,6 +56,12 @@
             <div id="results-container"></div>
     </div>
 
+    <section class="pagination">
+        <button id="prev-page-btn" class="prev-page">Back</button>
+        
+        <button id="next-page-btn" class="next-page">Next</button>
+    </section>
+
     <div class="map-section">
         <h2>Map View</h2>
         <div id="map"></div>
@@ -69,23 +82,17 @@
 
 
     <footer>
-        <section class="pagination">
-            <button id="prev-page-btn" class="prev-page">Back</button>
-            
-            <button id="next-page-btn" class="next-page">Next</button>
-        </section>
-
         <p class="data-info">
                 <h3> 
                     Data provided by europe-destinations.csv 
                 </h3> 
             </p>
-        
     </footer>    
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="lab3.js"></script>
 </body>
 </html>
+
 
 

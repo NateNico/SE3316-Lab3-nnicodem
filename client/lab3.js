@@ -9,14 +9,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const listNameInput = document.getElementById('list-name');
     const favoritesContainer = document.getElementById('favorites-results');
 
+    const prevPageButton = document.getElementById('prev-page-btn');
+    const nextPageButton = document.getElementById('next-page-btn');
+
     // Initialize map
     const map = L.map(mapElement).setView([51.505, -0.09], 5);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+    // Pagination state
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentSearchParams = {};
+    let currentMarkers = [];
+
     // Add search functionality
     searchButton.addEventListener('click', async () => {
+        currentPage = 1; 
+        await performSearch();
+    });
+
+    // Next Page functionality
+    nextPageButton.addEventListener('click', async () => {
+        if (currentPage < totalPages) {
+            currentPage += 1;
+            await performSearch();
+        }
+    });
+
+    // Previous Page functionality
+    prevPageButton.addEventListener('click', async () => {
+        if (currentPage > 1) {
+            currentPage -= 1;
+            await performSearch();
+        }
+    });
+
+    async function performSearch() {
         const field = document.getElementById('search-field').value.trim();
         const pattern = document.getElementById('search-bar').value.trim();
         const limit = parseInt(document.getElementById('search-limit').value.trim(), 10);
@@ -40,18 +70,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:3000/destinations/search?field=${encodeURIComponent(normalizedField)}&pattern=${encodeURIComponent(pattern)}&limit=${limit}`);
+            const response = await fetch(`http://localhost:3000/destinations/search?field=${encodeURIComponent(normalizedField)}&pattern=${encodeURIComponent(pattern)}&limit=${limit}&page=${currentPage}`);
             if (response.ok) {
-                const results = await response.json();
+                const data = await response.json();
+                const results = data.results;
+                currentPage = data.currentPage;
+                totalPages = data.totalPages;
+                const totalResults = data.totalResults;
+                currentSearchParams = { field, pattern, limit };
+                updatePaginationButtons();
                 resultsContainer.innerHTML = '';
-                map.eachLayer((layer) => {
-                    if (layer instanceof L.Marker) {
-                        map.removeLayer(layer);
-                    }
-                });
+                clearMapMarkers();
 
                 if (results.length > 0) {
-                    results.slice(0, limit).forEach(dest => {
+                    results.forEach(dest => {
                         const resultDiv = document.createElement('div');
                         resultDiv.classList.add('destination-item');
                         resultDiv.innerHTML = `
@@ -81,9 +113,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         resultsContainer.appendChild(resultDiv);
 
                         if (dest.Latitude && dest.Longitude) {
-                            L.marker([dest.Latitude, dest.Longitude]).addTo(map)
-                                .bindPopup(`<b>${dest._Destination}</b><br>${dest.Country}`)
-                                .openPopup();
+                            const marker = L.marker([dest.Latitude, dest.Longitude]).addTo(map);
+                            marker.bindPopup(`<b>${dest._Destination}</b><br>${dest.Country}`);
+                            currentMarkers.push({ marker, id: dest.ID });
+                            const checkbox = resultDiv.querySelector('input[type="checkbox"]');
+                            checkbox.addEventListener('change', (e) => {
+                                if (e.target.checked) {
+                                    marker.bindPopup(`<b>${dest._Destination}</b><br>${dest.Country}`).openPopup();
+                                } else {
+                                    marker.closePopup();
+                                }
+                            });
                         }
                     });
                     map.setView([results[0].Latitude, results[0].Longitude], 6);
@@ -91,13 +131,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     resultsContainer.textContent = 'No matching results found.';
                 }
             } else {
-                resultsContainer.textContent = 'No matching results found.';
+                const errorData = await response.json();
+                resultsContainer.textContent = errorData.error || 'No matching results found.';
             }
         } catch (error) {
             console.error('Error fetching data:', error);
             resultsContainer.textContent = 'An error occurred while fetching the data.';
         }
-    });
+    }
+
+    function updatePaginationButtons() {
+        if (currentPage <= 1) {
+            prevPageButton.disabled = true;
+            prevPageButton.style.opacity = 0.5;
+            prevPageButton.style.cursor = 'not-allowed';
+        } else {
+            prevPageButton.disabled = false;
+            prevPageButton.style.opacity = 1;
+            prevPageButton.style.cursor = 'pointer';
+        }
+
+        if (currentPage >= totalPages) {
+            nextPageButton.disabled = true;
+            nextPageButton.style.opacity = 0.5;
+            nextPageButton.style.cursor = 'not-allowed';
+        } else {
+            nextPageButton.disabled = false;
+            nextPageButton.style.opacity = 1;
+            nextPageButton.style.cursor = 'pointer';
+        }
+    }
+
+    function clearMapMarkers() {
+        currentMarkers.forEach(({ marker }) => {
+            map.removeLayer(marker);
+        });
+        currentMarkers = [];
+    }
 
     // Function to save selected results to a favorites list
     async function saveToFavoritesList(listName, destinationIDs) {
@@ -145,15 +215,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Save selected destinations to a list
+    // Save selected destinations to a list, Get checked destinations from the search results
     saveListButton.addEventListener('click', async () => {
         const listName = listNameInput.value.trim();
         if (!listName) {
             alert('Please enter a list name.');
             return;
         }
-    
-        // Get checked destinations from the search results
+
         const destinationIDs = Array.from(document.querySelectorAll('.destination-item input:checked'))
             .map(input => parseInt(input.value));
     
@@ -163,7 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     
         try {
-            // Double-check that the URL is correctly formed
             const response = await fetch(`http://localhost:3000/lists/${encodeURIComponent(listName)}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -196,6 +264,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 const destinations = await response.json();
                 favoritesContainer.innerHTML = '';
+                clearMapMarkers(); 
+
                 destinations.forEach(dest => {
                     const destDiv = document.createElement('div');
                     destDiv.classList.add('destination-item');
@@ -223,9 +293,19 @@ document.addEventListener('DOMContentLoaded', () => {
                             <hr style="border-top: 1px solid #ccc; margin: 15px 0;">
                         `;
                         
+                        if (dest.Latitude && dest.Longitude) {
+                            const marker = L.marker([dest.Latitude, dest.Longitude]).addTo(map)
+                                .bindPopup(`<b>${dest._Destination}</b><br>${dest.Country}`)
+                                .openPopup();
+                            currentMarkers.push({ marker, id: dest.ID });
+                        }
                     }
                     favoritesContainer.appendChild(destDiv);
                 });
+
+                if (destinations.length > 0) {
+                    map.setView([destinations[0].Latitude, destinations[0].Longitude], 6);
+                }
             } else {
                 const error = await response.json();
                 alert(`Error: ${error.error}`);
@@ -252,7 +332,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 alert(`List '${listName}' deleted successfully.`);
-                favoritesContainer.innerHTML = ''; // Clear the container after deletion
+                favoritesContainer.innerHTML = ''; 
+                clearMapMarkers(); 
             } else {
                 const error = await response.json();
                 alert(`Error: ${error.error}`);
@@ -262,4 +343,4 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('An error occurred while deleting the list.');
         }
     });
-}); 
+});

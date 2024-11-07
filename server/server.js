@@ -6,11 +6,8 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = 3000;
 
-// Middleware
 app.use(bodyParser.json());
 app.use(express.static('public'));
-
-// Enable CORS for all routes (optional, for development purposes)
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*'); 
     res.header('Access-Control-Allow-Headers', 'Content-Type');
@@ -18,7 +15,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// Load destination data from CSV
 let destinations = [];
 fs.createReadStream(path.join(__dirname, 'data', 'europe-destinations.csv'))
     .pipe(csv())
@@ -39,10 +35,8 @@ fs.createReadStream(path.join(__dirname, 'data', 'europe-destinations.csv'))
         console.log('CSV file successfully processed.');
     });
 
-// File-based storage for favorite lists
 const listsFile = path.join(__dirname, 'data', 'lists.json');
 
-// Utility functions for favorite lists
 function readLists() {
     try {
         const data = fs.readFileSync(listsFile, 'utf8');
@@ -55,21 +49,17 @@ function readLists() {
 function writeLists(lists) {
     fs.writeFileSync(listsFile, JSON.stringify(lists, null, 2), 'utf8');
 }
-
-// Root route
 app.get('/', (req, res) => {
     res.send('Hello, World! This is the root route.');
 });
 
-// Search route
+// Search route with pagination
 app.get('/destinations/search', (req, res) => {
-    const { field, pattern, limit } = req.query;
+    const { field, pattern, limit, page } = req.query;
 
     if (!field || !pattern) {
         return res.status(400).json({ error: 'Field and pattern are required for search.' });
     }
-
-    // Normalize field to match the format in `destinations`
     const normalizedField = field.replace(/\s+/g, '_');
 
     const filteredResults = destinations.filter(dest => {
@@ -86,12 +76,24 @@ app.get('/destinations/search', (req, res) => {
         return res.status(404).json({ error: 'No matching results found.' });
     }
 
-    const resultLimit = parseInt(limit, 10);
-    res.json(isNaN(resultLimit) || resultLimit <= 0 ? filteredResults : filteredResults.slice(0, resultLimit));
+    const resultLimit = parseInt(limit, 10) || filteredResults.length;
+    const currentPage = parseInt(page, 10) || 1;
+    const totalResults = filteredResults.length;
+    const totalPages = Math.ceil(totalResults / resultLimit);
+
+    // Calculate start and end indices
+    const startIndex = (currentPage - 1) * resultLimit;
+    const endIndex = startIndex + resultLimit;
+
+    const paginatedResults = filteredResults.slice(startIndex, endIndex);
+
+    res.json({
+        currentPage,
+        totalPages,
+        totalResults,
+        results: paginatedResults
+    });
 });
-
-
-
 
 // Endpoint to get details by ID
 app.get('/destinations/:id', (req, res) => {
@@ -113,25 +115,24 @@ app.get('/destinations', (req, res) => {
 // Create a new favorite list
 app.post('/lists/:name', (req, res) => {
     const listName = req.params.name;
-    console.log(`Received request to create list: ${listName}`); // Log the list name
+    console.log(`Received request to create list: ${listName}`); 
 
     const lists = readLists();
-    console.log('Current lists:', lists); // Log the current state of the lists
+    console.log('Current lists:', lists); 
 
     if (lists[listName]) {
-        console.log(`List '${listName}' already exists.`); // Log if list already exists
+        console.log(`List '${listName}' already exists.`); 
         return res.status(400).json({ error: 'List name already exists.' });
     }
 
     lists[listName] = [];
-    console.log('Updated lists after adding new list:', lists); // Log updated lists before writing
+    console.log('Updated lists after adding new list:', lists); 
 
     writeLists(lists);
-    console.log(`List '${listName}' created successfully.`); // Log success message
+    console.log(`List '${listName}' created successfully.`); 
 
     res.status(201).json({ message: `List '${listName}' created.` });
 });
-
 
 // Save a list of destination IDs
 app.put('/lists/:name', (req, res) => {
@@ -202,4 +203,3 @@ app.get('/lists/:name/details', (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
 });
-
