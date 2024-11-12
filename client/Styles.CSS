@@ -273,4 +273,44 @@ body {
             flex-direction: column;
         }
     }
+
+    .countries-section {
+        background-color: #6d5a8d;
+        padding: 10px;
+        margin: 10px auto;
+        border-radius: 2px;
+        width: calc(20% - 8px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        color: #070404;
+        text-align: center;
+    }
+    
+    .country-list {
+        padding: 0;
+        list-style-type: none;
+    }
+    
+    .country-list li {
+        padding: 10px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        margin-top: 5px;
+        font-size: 18px;
+    }
+
+    #view-countries-btn {
+        font-size: 1.5em; 
+        padding: 10px 20px;
+        background-color: #2a4562;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    
+    #view-countries-btn:hover {
+        background-color: #1f3b5a; 
+    }
+    
+    
 }

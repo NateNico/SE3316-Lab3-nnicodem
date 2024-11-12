@@ -140,6 +140,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+
+
+    // List of countries to display
+    const countries = [
+        "Italy", "Spain", "France", "Austria", "Belgium", "Denmark", 
+        "Germany", "Monaco", "Russia", "Greece", "Portugal", "Norway", 
+        "Sweden", "Switzerland", "Turkey", "Ukraine", "United Kingdom", 
+        "Luxembourg", "Malta", "Iceland", "Serbia"
+    ];
+
+    function displayCountries() {
+        const countryList = document.getElementById("countries");
+
+        if (countryList.children.length === 0) {
+            countries.forEach(country => {
+                const li = document.createElement("li");
+                li.textContent = country;
+                countryList.appendChild(li);
+            });
+        }
+
+        countryList.style.display = countryList.style.display === "none" ? "block" : "none";
+    }
+
+    document.getElementById("view-countries-btn").addEventListener("click", displayCountries);
+
+
+
+
+
     function updatePaginationButtons() {
         if (currentPage <= 1) {
             prevPageButton.disabled = true;

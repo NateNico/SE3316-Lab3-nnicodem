@@ -15,6 +15,7 @@ app.use((req, res, next) => {
     next();
 });
 
+
 let destinations = [];
 fs.createReadStream(path.join(__dirname, 'data', 'europe-destinations.csv'))
     .pipe(csv())
