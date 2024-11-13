@@ -311,6 +311,47 @@ body {
     #view-countries-btn:hover {
         background-color: #1f3b5a; 
     }
-    
-    
+
+        /* Container for destination ID input and save button */
+    .destination-id-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    /* Styling the destination ID input field */
+    #destination-id {
+        width: 60%; /* Adjust width as needed */
+        padding: 8px;
+        font-size: 1em;
+        border: 2px solid #4d4343;
+        border-radius: 4px;
+        outline: none;
+        color: #333;
+        background-color: #f9f9f9;
+        transition: border-color 0.3s;
+    }
+
+    #destination-id:focus {
+        border-color: #a771e4;
+    }
+
+    /* Styling the Save ID button */
+    #save-id-btn {
+        padding: 8px 15px;
+        font-size: 1em;
+        background-color: #61337a;
+        color: #ffffff;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+    }
+
+    #save-id-btn:hover {
+        background-color: #4d0462;
+    }
+
 }

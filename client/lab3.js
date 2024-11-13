@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const deleteListButton = document.getElementById('delete-list-btn');
     const listNameInput = document.getElementById('list-name');
     const favoritesContainer = document.getElementById('favorites-results');
+    const destinationIdInput = document.getElementById('destination-id');
+
 
     const prevPageButton = document.getElementById('prev-page-btn');
     const nextPageButton = document.getElementById('next-page-btn');
@@ -88,7 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         resultDiv.classList.add('destination-item');
                         resultDiv.innerHTML = `
                             <div class="checkbox-container">
-                                <input type="checkbox" value="${dest.ID}"> <label>Select for Favorites</label>
+                                <input type="checkbox" value="${dest.ID}" class="destination-checkbox">
+                                <label>Select for Favorites</label>
                             </div>
                             <h3 style="font-size: 1.5em; font-weight: bold; margin-bottom: 10px;">${dest._Destination}</h3>
                             <p><strong>Region:</strong> ${dest.Region}</p>
@@ -137,8 +140,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error fetching data:', error);
             resultsContainer.textContent = 'An error occurred while fetching the data.';
+            }
         }
-    }
 
 
 
@@ -199,6 +202,54 @@ document.addEventListener('DOMContentLoaded', () => {
         currentMarkers = [];
     }
 
+    saveListButton.addEventListener('click', async () => {
+        const listName = listNameInput.value.trim();
+        const enteredID = parseInt(destinationIdInput.value.trim(), 10);
+        const selectedIDs = Array.from(document.querySelectorAll('.destination-checkbox:checked'))
+            .map(input => parseInt(input.value, 10));
+    
+        // Combine entered ID and selected IDs, removing duplicates
+        const destinationIDs = new Set();
+    
+        if (!listName) {
+            alert('Please enter a list name.');
+            return;
+        }
+    
+        if (!isNaN(enteredID)) {
+            destinationIDs.add(enteredID); // Add entered ID if it's valid
+        }
+    
+        selectedIDs.forEach(id => destinationIDs.add(id)); // Add all selected IDs
+    
+        if (destinationIDs.size === 0) {
+            alert('Please enter a destination ID or select destinations to save.');
+            return;
+        }
+    
+        try {
+            const response = await fetch(`http://localhost:3000/lists/${encodeURIComponent(listName)}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ destinationIDs: Array.from(destinationIDs) })
+            });
+    
+            if (response.ok) {
+                alert(`Destinations saved to '${listName}' successfully.`);
+                // Clear the input after saving
+                destinationIdInput.value = '';
+                document.querySelectorAll('.destination-checkbox:checked').forEach(checkbox => checkbox.checked = false);
+            } else {
+                const error = await response.json();
+                alert(`Error: ${error.error}`);
+            }
+        } catch (error) {
+            console.error('Error saving destinations:', error);
+            alert('An error occurred while saving the destinations.');
+        }
+    });
+
+
     // Function to save selected results to a favorites list
     async function saveToFavoritesList(listName, destinationIDs) {
         try {
@@ -221,6 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Create a new list
     createListButton.addEventListener('click', async () => {
+        console.log("Create List button clicked");
         const listName = listNameInput.value.trim();
         if (!listName) {
             alert('Please enter a list name.');
@@ -245,43 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Save selected destinations to a list, Get checked destinations from the search results
-    saveListButton.addEventListener('click', async () => {
-        const listName = listNameInput.value.trim();
-        if (!listName) {
-            alert('Please enter a list name.');
-            return;
-        }
-
-        const destinationIDs = Array.from(document.querySelectorAll('.destination-item input:checked'))
-            .map(input => parseInt(input.value));
-    
-        if (destinationIDs.length === 0) {
-            alert('Please select destinations to save.');
-            return;
-        }
-    
-        try {
-            const response = await fetch(`http://localhost:3000/lists/${encodeURIComponent(listName)}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ destinationIDs })
-            });
-    
-            if (response.ok) {
-                alert(`Destinations saved to '${listName}' successfully.`);
-            } else {
-                const error = await response.json();
-                alert(`Error: ${error.error}`);
-            }
-        } catch (error) {
-            console.error('Error saving list:', error);
-            alert('An error occurred while saving the list.');
-        }
-    });
-    
-    
-    // View a list
+        // View a list
     viewListButton.addEventListener('click', async () => {
         const listName = listNameInput.value.trim();
         if (!listName) {
